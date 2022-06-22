@@ -1,7 +1,8 @@
-﻿using PW.Drawing.Imaging;
+﻿using CSharpFunctionalExtensions;
+using PW.Drawing.Imaging;
 
 namespace SlideShow;
-internal class PlayListFactory
+internal static class PlayListFactory
 {
 
 
@@ -14,7 +15,7 @@ internal class PlayListFactory
   }
 
 
-  public (bool Success, string Error, PlayList? PlayList) Create(string fileOrDirectoryPath)
+  public static Result<PlayList> Create(string fileOrDirectoryPath)
   {
     try
     {
@@ -30,12 +31,12 @@ internal class PlayListFactory
       var playList = new PlayList(filePaths);
 
       return playList.Count != 0
-        ? (true, string.Empty, playList)
-        : (false, "No pictures were found.", null);
+        ? playList
+        : Result.Failure<PlayList>("No pictures were found.");
     }
     catch (Exception ex)
     {
-      return (false, ex.Message, null);
+      return Result.Failure<PlayList>(ex.Message);
     }
   }
 

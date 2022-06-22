@@ -1,6 +1,6 @@
-using Microsoft.VisualBasic;
-using OneOf.Types;
-using PW.Drawing.Imaging;
+using CSharpFunctionalExtensions;
+using PW.IO.FileSystemObjects;
+using System.IO;
 
 namespace SlideShow;
 
@@ -19,54 +19,34 @@ internal static class Program
     AppDomain.CurrentDomain.UnhandledException += GlobalExceptionHandler;
 
 
-    var commandlineValidation = ValidateCommandLine(args);
-
-    if (!commandlineValidation.Success)
-    {
-      MessageBox.Show(commandlineValidation.Error, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-      return;
-    }
-
-
-
-    var playlistResult = new PlayListFactory().Create(args[0]);
-
-    if (!playlistResult.Success)
-    {
-      MessageBox.Show(playlistResult.Error, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-      return;
-    }
-
-    if (AskUser("Shuffle list?")) playlistResult.PlayList!.Shuffle();
-    Application.Run(new MainForm(playlistResult.PlayList!));
+    ValidateCommandLine(args)
+      .Bind(() => PlayListFactory.Create(args[0]))
+      .Tap(playlist => { if (AskUser("Shuffle list?")) playlist.Shuffle(); })
+      .Match(
+        onSuccess: playlist => Application.Run(new MainForm(playlist)),
+        onFailure: ShowError);
 
   }
 
 
   private static void GlobalExceptionHandler(object sender, UnhandledExceptionEventArgs e)
   {
-    Interaction.MsgBox(e.ExceptionObject.ToString() ?? "Unknown Exception", MsgBoxStyle.Critical | MsgBoxStyle.OkOnly, "Unhandled Exception");
+    ShowError(e.ExceptionObject.ToString() ?? "Unknown Exception");
     Application.Exit();
   }
 
 
+  public static void ShowError(string error) => MessageBox.Show(error, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
-  public static bool AskUser(string question)
+
+  public static bool AskUser(string question) =>
+    MessageBox.Show(question, "Question", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
+
+
+  private static Result ValidateCommandLine(string[] args)
   {
-    return Interaction.MsgBox(question, MsgBoxStyle.Question | MsgBoxStyle.YesNo) == MsgBoxResult.Yes;
-  }
-
-  public static (bool Success, string Error) ValidateCommandLine(string[] args) // (Success As Boolean, [Error] As String)
-  {
-    if ((args.Length == 0))
-      return (false, "No command line argument was supplied. The full path to an image or to a directory containing images is required.");
-
-    var commandLine = args[0];
-
-
-    return Directory.Exists(commandLine) ? (true, string.Empty)
-      : !File.Exists(commandLine) == false ? (false, "File not found: " + commandLine)
-      : !GdiImageDecoderFormats.IsSupported(Path.GetExtension(commandLine)) ? (false, "File must be of type: " + GdiImageDecoderFormats.All())
-      : (true, string.Empty);
+    return Result
+    .SuccessIf(args.Length != 0, "No command line argument was supplied. The full path to an image or to a directory containing images is required.")
+    .Bind(() => Result.SuccessIf(new FileSystemPath(args[0]).Exists, "Directory or File not found: " + args[0]));
   }
 }

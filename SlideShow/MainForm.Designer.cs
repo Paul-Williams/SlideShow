@@ -40,6 +40,7 @@ partial class MainForm
       this.PictureBox.Location = new System.Drawing.Point(0, 0);
       this.PictureBox.Name = "PictureBox";
       this.PictureBox.Size = new System.Drawing.Size(403, 351);
+      this.PictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
       this.PictureBox.TabIndex = 0;
       this.PictureBox.TabStop = false;
       // 

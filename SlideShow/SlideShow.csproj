@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="PW.Common" Version="4.0.12" />
+    <PackageReference Include="PW.Common" Version="5.0.2" />
     <PackageReference Include="PW.Drawing" Version="3.1.0" />
   </ItemGroup>
 
