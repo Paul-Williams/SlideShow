@@ -20,7 +20,7 @@
 
   <ItemGroup>
     <Reference Include="PW.WebP">
-      <HintPath>..\..\..\..\tfs\Class Libraries\PW.WebP\PW.WebP\bin\Release\PW.WebP.dll</HintPath>
+      <HintPath>C:\Repos\tfs\Class Libraries\PW.WebP\PW.WebP\bin\Release\PW.WebP.dll</HintPath>
     </Reference>
   </ItemGroup>
 
