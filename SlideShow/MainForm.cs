@@ -69,8 +69,7 @@ internal partial class MainForm : Form
       var oldImage = PictureBox.Image;
       PictureBox.Image = newImage;
 
-      if (oldImage != null)
-        oldImage.Dispose();
+      oldImage?.Dispose();
     }
     catch (Exception ex)
     {
@@ -78,7 +77,7 @@ internal partial class MainForm : Form
     }
   }
 
-  private static Image LoadImage(string filePath) => 
+  private static Image LoadImage(string filePath) =>
     Path.GetExtension(filePath) == ".webp" ? PW.WebP.WebPDecoder.Load(filePath) : Image.FromFile(filePath);
 
 
@@ -94,22 +93,22 @@ internal partial class MainForm : Form
       var timerWasEnabled = ImageDisplayTimer.Enabled;
       ImageDisplayTimer.Stop();
 
+      var filePathToDelete = PlayList.Current;
+
+      //if (Program.AskUser("Delete current image?" + Constants.vbCrLf + Constants.vbCrLf + filePathToDelete))
+      //{
       // There is a potential race condition here
       // If _PlayList.Current changes between calls to _playList.Current.Path and _playList.RemoveCurrent()
       // The condition would not occur if there were a _playlist.Remove(file) method.
-      var filePathToDelete = PlayList.Current;
       PlayList.RemoveCurrent();
 
-
-      if (Program.AskUser("Delete current image?" + Constants.vbCrLf + Constants.vbCrLf + filePathToDelete))
-      {
-        // File is kept open while image is displayed, so we must dispose the current image before deleting
-        // NB: This has not been tested since changing displaying the image using PictureBox.Image to PictureBox.ImageLocation
-        DisposePictureBoxImage();
-        PW.IO.FileSystemObjects.FileSystem.SendFileToRecycleBin(filePathToDelete);
-      }
-      if (timerWasEnabled)
-        ImageDisplayTimer.Start();
+      // File is kept open while image is displayed, so we must dispose the current image before deleting
+      // NB: This has not been tested since changing displaying the image using PictureBox.Image to PictureBox.ImageLocation
+      DisposePictureBoxImage();
+      PW.IO.FileSystemObjects.FileSystem.SendFileToRecycleBin(filePathToDelete);
+      RenderCurrentImage();
+      //}
+      if (timerWasEnabled) ImageDisplayTimer.Start();
     }
     catch (Exception ex)
     {
