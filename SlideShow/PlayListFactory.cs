@@ -26,7 +26,11 @@ internal static class PlayListFactory
       var filePaths = directoryPath
         .EnumerateFiles("*", new EnumerationOptions() { IgnoreInaccessible = true, RecurseSubdirectories = true})
         .Where(IsSupportedImage)
-        .Select(x => x.FullName);
+        .Select(x => x.FullName)
+        .ToArray();
+
+      // EnumerateFiles() does not always properly sort file name sequences containing numbers.
+      Array.Sort(filePaths, PW.Collections.StringNaturalComparer.AscendingComparer);
 
       var playList = new PlayList(filePaths);
 
